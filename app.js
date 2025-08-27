@@ -1,6 +1,8 @@
 import "reflect-metadata"
 import { initEmailRecordDataSource } from "./src/service/EmailRecordSource";
 
+//require('dotenv').config()
+
 const express = require('express')
 
 const app = express();

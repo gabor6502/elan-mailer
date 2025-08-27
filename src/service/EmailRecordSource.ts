@@ -1,7 +1,5 @@
 import { DataSource } from 'typeorm'
 
-require('dotenv').config()
-
 /**
  * @name EmailRecordDataSource
  *

@@ -60,11 +60,21 @@ export class EmailRecordService
         this.#_recManager = man
     }
 
-    async addRecord(fname: string, lname: string, emailaddr: string, date: string)
+    /**
+     * @name addRecord
+     * 
+     * @description Adds a record of an email sent into the database
+     * 
+     * @param fname First name of sender
+     * @param lname Last name of sender
+     * @param emailaddr Email address of sender
+     * @param date Date email sent
+     */
+    async addRecord(fname: string, lname: string, emailaddr: string, date: string): Promise<void>
     {
 
         // valiate input
-        
+
         if (fname.length > MAX_CHARS || lname.length > MAX_CHARS || emailaddr.length > MAX_CHARS)
         {
             throw new CharacterLimitError()
