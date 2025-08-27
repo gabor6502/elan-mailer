@@ -15,7 +15,8 @@ const PORT = 6969
  */
 app.post('/send', async (request, response) => 
 {
-   console.log("whaddup")
+   response.status(200)
+   response.send({body: "hi!"})
 })
 
 /**

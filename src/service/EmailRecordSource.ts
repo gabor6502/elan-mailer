@@ -1,6 +1,8 @@
 import { DataSource } from 'typeorm'
 import { Record } from '../entity/Record'
 
+require('dotenv').config()
+
 /**
  * @name EmailRecordDataSource
  *
@@ -9,10 +11,10 @@ import { Record } from '../entity/Record'
 export const EmailRecordDataSource = new DataSource(
 {
     type: 'postgres',
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST ,
     port: Number(process.env.DB_PORT),
-    username: process.env.DB_USR,
-    password: process.env.DB_PWD,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: ['/../**/**.entity{.ts,.js}'],
     synchronize: true
