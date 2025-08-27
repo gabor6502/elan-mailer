@@ -1,7 +1,10 @@
 import "reflect-metadata"
-import { initEmailRecordDataSource } from "./src/service/EmailRecordSource";
+import { initEmailRecordDataSource, RecordManager } from "./src/service/EmailRecordSource";
 
-//require('dotenv').config()
+import { EmailRecordService } from "./src/service/EmailRecordService";
+import { EmailControler } from "./src/controller/EmailController";
+
+const controller = new EmailControler(new EmailRecordService(RecordManager))
 
 const express = require('express')
 
@@ -17,8 +20,10 @@ const PORT = 6969
  */
 app.post('/send', async (request, response) => 
 {
-   response.status(200)
-   response.send({body: "hi!"})
+    await controller.sendEmail()
+
+    response.status(200)
+    response.send({body: "sent an email"})
 })
 
 /**
