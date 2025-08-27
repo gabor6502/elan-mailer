@@ -1,5 +1,4 @@
 import { DataSource } from 'typeorm'
-import { Record } from '../entity/Record'
 
 require('dotenv').config()
 
@@ -26,14 +25,6 @@ export const EmailRecordDataSource = new DataSource(
  * @description Entity Manager for records 
  */
 export const RecordManager = EmailRecordDataSource.manager
-
-
-/**
- * @name RecordRepository
- * 
- * @description Repository for records 
- */
-export const RecordRepository = EmailRecordDataSource.getRepository(Record)
 
 /**
  * @name initEmailRecordDataSource

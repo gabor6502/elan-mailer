@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
 
+export const MAX_CHARS = 256
+
 /**
  * @name Record
  * 
@@ -11,13 +13,13 @@ export class Record {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column({type: 'varchar', length: MAX_CHARS})
     firstName: string
 
-    @Column()
+    @Column({type: 'varchar', length: MAX_CHARS})
     lastName: string
 
-    @Column()
+    @Column({type: 'varchar', length: MAX_CHARS})
     emailAddress: string
 
     @Column({ type: 'timestamptz' })
