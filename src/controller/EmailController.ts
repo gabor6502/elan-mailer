@@ -30,8 +30,8 @@ export class EmailControler
     {
 
         const emailResult = await this.#_transporter.sendMail({
-            from: "contact.egabor@gmail.com",
-            to: "contact.egabor@gmail.com",
+            from: process.env.SMTP_CONTACT_ADDRESS, // once testing is done, change this to accept a valid email
+            to: process.env.SMTP_CONTACT_ADDRESS,
             subject: "Testing",
             text: "You've been tested"
         })
