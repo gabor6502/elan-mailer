@@ -72,7 +72,6 @@ export class EmailRecordService
      */
     async addRecord(fname: string, lname: string, emailaddr: string, date: string): Promise<void>
     {
-
         // valiate input
 
         if (fname.length > MAX_CHARS || lname.length > MAX_CHARS || emailaddr.length > MAX_CHARS)

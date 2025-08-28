@@ -44,3 +44,25 @@ export async function initEmailRecordDataSource(): Promise<void>
         console.log(error)
     }
 }
+
+/**
+ * @name destroyEmailRecordDataSource
+ * 
+ * @description Closes and destroys resources associated with the data source
+ * 
+ * @retruns Promise<void>
+ */
+export async function destroyEmailRecordDataSource(): Promise<void>
+{
+    try
+    {
+        EmailRecordDataSource.destroy()
+
+        console.log("Data source destroyed")
+    } catch (error)
+    {
+        console.log("FAILED to destroy data source")
+        console.log(error)
+    }
+    
+}

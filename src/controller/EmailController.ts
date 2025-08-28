@@ -11,11 +11,12 @@ type EmailResponse = {status: number, message: string}
 export class EmailControler
 {
     #_recordsService: EmailRecordService
-    #_transporter
+    #_transporter: any
 
     constructor(service: EmailRecordService)
     {
         this.#_recordsService = service
+
         this.#_transporter = nodemailer.createTransport({
             service: process.env.SMTP_SERVICE,
             auth:
@@ -28,6 +29,8 @@ export class EmailControler
 
     async sendEmail(): Promise<EmailResponse>
     {
+
+
 
         const emailResult = await this.#_transporter.sendMail({
             from: process.env.SMTP_CONTACT_ADDRESS, // once testing is done, change this to accept a valid email
