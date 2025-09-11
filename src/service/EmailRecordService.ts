@@ -78,15 +78,15 @@ export class EmailRecordService
         {
             throw new CharacterLimitError()
         }
-        else if (DATE_REGEX.test(date)) 
+        else if (!DATE_REGEX.test(date)) 
         {
             throw new DateFormatError()
         }
-        else if (EMAIL_REGEX.test(emailaddr))
+        else if (!EMAIL_REGEX.test(emailaddr))
         {
             throw new EmailFormatError()
         }
 
-        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: date})
+        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: new Date(date)})
     }
 }
