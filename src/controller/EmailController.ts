@@ -1,4 +1,5 @@
-import { EmailRecordService } from "../service/EmailRecordService";
+import { EmailRecordService, CharacterLimitError, DateFormatError, EmailFormatError } from "../service/EmailRecordService";
+
 const nodemailer = require("nodemailer");
 
 type EmailResponse = {status: number, message: string}
@@ -38,7 +39,7 @@ class DatabaseEntry
     #_emailAddress: string
     #_date: string
 
-    constructor(fname: string | undefined, lname: string | undefined, eadd: string | undefined, date: string | undefined)
+    private constructor(fname: string | undefined, lname: string | undefined, eadd: string | undefined, date: string | undefined)
     {
         let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
 
@@ -68,6 +69,11 @@ class DatabaseEntry
         this.#_laststName = lname
         this.#_emailAddress = eadd
         this.#_date = date
+    }
+
+    static makeEntry(fname: string | undefined, lname: string | undefined, eadd: string | undefined, date: string | undefined): DatabaseEntry
+    {
+        return new DatabaseEntry(fname, lname, eadd, date)
     }
 
     get firstName(): string
@@ -117,36 +123,53 @@ export class EmailControler
 
     async sendEmail(reqJson: expectedJSON): Promise<EmailResponse>
     {
-        let dbEntry: DatabaseEntry = new DatabaseEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress, reqJson.date)
-        // TODO ^ catch this, maybe make it a method call instead of construction
+        let dbEntry: DatabaseEntry
 
-        let resp: EmailResponse
-
-        // temp vars, add to class
         let message: string = reqJson.message
         let subject: string = reqJson.subject
+        let emailResult: any
 
-        const emailResult = await this.#_transporter.sendMail({
-            from: process.env.SMTP_CONTACT_ADDRESS, 
-            to: process.env.SMTP_CONTACT_ADDRESS,
-            subject: subject,
-            text: "From: "+reqJson.emailAddress+"\n"+message
-        })
-        console.log(emailResult.response)
-
+        // create an entry
+        try
+        {
+            dbEntry = DatabaseEntry.makeEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress, reqJson.date)
+        } catch(error)
+        {
+            return {status: 400, message: error.message}
+        }
+        
+        // save the entry
         try
         {
             await this.#_recordsService.addRecord(dbEntry.firstName, dbEntry.lastName, dbEntry.emailAddress, dbEntry.date)
-
-            resp = {status: 201, message: "success"} // 201 for record inserted
         } catch (error)
         {
-            resp = {status:500, message: error.message}
-
-            // todo add error handling for db inserton
-
+            if (error instanceof CharacterLimitError || error instanceof DateFormatError || error instanceof EmailFormatError)
+            {
+                return {status: 400, message: error.message}
+            }
+            else
+            {
+                return {status: 500, message: "A database error occured"}
+            }
         }
-            
-        return resp
+
+        // now that it's recorded, send the email
+        try
+        {
+            emailResult = await this.#_transporter.sendMail({
+                from: process.env.SMTP_CONTACT_ADDRESS, 
+                to: process.env.SMTP_CONTACT_ADDRESS,
+                subject: subject,
+                text: "From: "+reqJson.emailAddress+"\n\n"+message
+            })
+        } catch(error)
+        {
+            return {status: 500, message: "Could not send email"}
+        }
+
+        console.log(emailResult.response)
+
+        return {status: 201, message: "success"} 
     }
 }
