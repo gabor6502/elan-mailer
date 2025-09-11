@@ -14,6 +14,10 @@ export const EmailRecordDataSource = new DataSource(
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: [Record]
+
+    // for init sync, run (** indicates value in .env file for you to set):
+    // npx cross-env DB_USERNAME=** DB_PASSWORD=** DB_PORT=** DB_HOST=** DB_NAME=** typeorm schema:sync -d .\build\src\service\EmailRecordSource.js
+    // dependency: cross-env
 })
 
 /**
