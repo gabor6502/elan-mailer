@@ -1,5 +1,6 @@
 import { EntityManager } from "typeorm"
 import { MAX_CHARS, Record } from "../entity/Record"
+import { Logger } from "../logger/logger"
 
 // the expected format for dates that will be put in the DB
 const DATE_REGEX = /20[2-9]\d:((0[1-9])|(1[0-2])):(([0-2][1-9])|(3[0-1]))Z[+|-](((0\d)|(1[0-2])):[0]{2})/
@@ -54,10 +55,12 @@ export class EmailFormatError extends Error
 export class EmailRecordService
 {
     #_recManager: EntityManager
+    #_logger: Logger
 
     constructor(man: EntityManager)
     {
         this.#_recManager = man
+        this.#_logger = new Logger("Service")
     }
 
     /**
@@ -87,6 +90,8 @@ export class EmailRecordService
             throw new EmailFormatError()
         }
 
+        this.#_logger.info(`Inserting record {${fname}, ${lname}, ${emailaddr}, ${date}} ... `)
         await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: new Date(date)})
+        this.#_logger.info("Record inserted")
     }
 }

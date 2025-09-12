@@ -1,5 +1,9 @@
 import { DataSource } from 'typeorm'
 import { Record } from '../entity/Record'
+import { Logger } from '../logger/logger'
+
+const logger = new Logger("Data source")
+
 /**
  * @name EmailRecordDataSource
  *
@@ -40,11 +44,10 @@ export async function initEmailRecordDataSource(): Promise<void>
     {
         await EmailRecordDataSource.initialize()
 
-        console.log("Data source init!")
+        logger.info("Data source init!")
     } catch (error)
     {
-        console.log("FAILED to init data source")
-        console.log(error)
+        logger.error("FAILED to init data source: "+error)
     }
 }
 
@@ -61,11 +64,10 @@ export async function destroyEmailRecordDataSource(): Promise<void>
     {
         EmailRecordDataSource.destroy()
 
-        console.log("Data source destroyed")
+        logger.info("Data source destroyed")
     } catch (error)
     {
-        console.log("FAILED to destroy data source")
-        console.log(error)
+        logger.error("FAILED to destroy data source "+error)
     }
     
 }

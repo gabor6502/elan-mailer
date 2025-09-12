@@ -3,3 +3,6 @@
 /.env
 /.vscode/
 /curlrequests.txt
+/logs/
+combined.log
+error.log

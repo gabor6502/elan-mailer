@@ -3,10 +3,12 @@ import { initEmailRecordDataSource, destroyEmailRecordDataSource, RecordManager 
 
 import { EmailRecordService } from "./src/service/EmailRecordService";
 import { EmailControler } from "./src/controller/EmailController";
+import { Logger } from "./src/logger/logger";
 
 const controller = new EmailControler(new EmailRecordService(RecordManager))
+const logger = new Logger("Server")
 
-const express = require('express')
+const express = require("express")
 
 const app = express();
 app.use(express.json()); // json middleware
@@ -25,10 +27,14 @@ var server
  */
 app.post('/send', async (request, response) => 
 {
+    logger.info("Received POST request on \"/send\"")
+
     let res = await controller.sendEmail(request.body)
 
     response.status(res.status)
     response.json(res.message)
+
+    logger.info(`\"/send\" response sent with code ${res.status} and message \"${res.message}\"`)
 })
 
 /**
@@ -40,13 +46,13 @@ server = app.listen(PORT, async (error) =>
 {
     if (error)
     {
-        console.log(error.message)
+        logger.error(error.message)
     }
     else
     {
         await initEmailRecordDataSource()
 
-        console.log(`Listening on port ${PORT}`)
+        logger.info(`Listening on port ${PORT}`)
     }
 })
 
@@ -61,10 +67,11 @@ process.once("SIGINT", async () =>
 
         await server.close(async () => 
         {
-            console.log("Shutting down server")
+            logger.info("Shutting down server")
 
             await destroyEmailRecordDataSource()
 
+            logger.info("End of processing")
             process.exit(0)
         })
     }

@@ -1,4 +1,5 @@
 import { EmailRecordService, CharacterLimitError, DateFormatError, EmailFormatError } from "../service/EmailRecordService";
+import { Logger } from "../logger/logger"
 
 const nodemailer = require("nodemailer");
 
@@ -108,6 +109,7 @@ export class EmailControler
 {
     #_recordsService: EmailRecordService
     #_transporter: any
+    #_logger: Logger
 
     constructor(service: EmailRecordService)
     {
@@ -121,6 +123,8 @@ export class EmailControler
                 pass: process.env.SMTP_PASS
             }
         })
+
+        this.#_logger = new Logger("Controller")
     }
 
     async sendEmail(reqJson: expectedJSON): Promise<EmailResponse>
@@ -131,12 +135,18 @@ export class EmailControler
         let subject: string = reqJson.subject
         let emailResult: any
 
+        // TODO: make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
+
+
+        
         // create an entry
+        this.#_logger.info("Creating a record in the database ...")
         try
         {
             dbEntry = DatabaseEntry.makeEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress, reqJson.date)
         } catch(error)
         {
+            this.#_logger.error(error.message)
             return {status: 400, message: error.message}
         }
         
@@ -148,15 +158,18 @@ export class EmailControler
         {
             if (error instanceof CharacterLimitError || error instanceof DateFormatError || error instanceof EmailFormatError)
             {
+                this.#_logger.error(error.message)
                 return {status: 400, message: error.message}
             }
             else
             {
+                this.#_logger.error("Could not insert into database")
                 return {status: 500, message: "A database error occured"}
             }
         }
 
         // now that it's recorded, send the email
+        this.#_logger.info("Sending email ...")
         try
         {
             emailResult = await this.#_transporter.sendMail({
@@ -169,8 +182,7 @@ export class EmailControler
         {
             return {status: 500, message: "Could not send email"}
         }
-
-        console.log(emailResult.response)
+        this.#_logger.info("Email sent - "+emailResult.response)
 
         return {status: 201, message: "success"} 
     }
