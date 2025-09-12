@@ -7,28 +7,30 @@ type expectedJSON = {firstName: string, lastName: string, emailAddress: string, 
 
 class MissingInfoError extends Error
 {
-    #_missing: string[]
+    #_hasErrors
 
     constructor()
     {
         super("Missing the following properties: ")
-        this.#_missing = []
+        this.#_hasErrors = false
     }
 
     addMissing(name: string)
     {
-        this.#_missing.length > 0 ? this.message += ", "+name : this.message += name
-        this.#_missing.push(name)
-    }
-
-    get missing(): string[]
-    {
-        return [...this.#_missing]
+        if (!this.#_hasErrors)
+        {
+            this.#_hasErrors = true
+            this.message = this.message + name
+        }
+        else
+        {
+            this.message += ", "+name
+        }
     }
 
     hasErrors(): boolean
     {
-        return this.#_missing.length > 0
+        return this.#_hasErrors
     }
 }
 
