@@ -1,6 +1,6 @@
 import { Between, EntityManager } from "typeorm"
 import { MAX_CHARS, Record } from "../entity/Record"
-import { Logger } from "../logger/logger"
+import { Logger } from "../logger/Logger"
 
 // the expected format for emails
 const EMAIL_REGEX = /[\w\-\.]+[@]([\w]+\.)+[\w\-]{2,}/

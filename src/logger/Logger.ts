@@ -17,7 +17,7 @@ export class Logger
      * 
      * @param componentName What component in the app does this logger log from?
      */
-    constructor(componentName)
+    constructor(componentName: string)
     {
         let logFormat = combine(
                 label({ label: componentName }), 
@@ -49,7 +49,7 @@ export class Logger
      * 
      * @param message The message to log 
      */
-    info(message)
+    info(message: string)
     {
         this.#_logger.info(message)
     }
@@ -61,7 +61,7 @@ export class Logger
      * 
      * @param message The message to log 
      */
-    error(message)
+    error(message: string)
     {
         this.#_logger.error(message)
     }

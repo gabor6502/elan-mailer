@@ -3,7 +3,7 @@ import { initEmailRecordDataSource, destroyEmailRecordDataSource, RecordManager 
 
 import { EmailRecordService } from "./src/service/EmailRecordService";
 import { EmailController } from "./src/controller/EmailController";
-import { Logger } from "./src/logger/logger";
+import { Logger } from "./src/logger/Logger";
 import { Transporter } from "./src/controller/Transporter";
 
 const controller = new EmailController(new EmailRecordService(RecordManager, new Logger("Service")), Transporter.getInstance(), new Logger("Controller"))

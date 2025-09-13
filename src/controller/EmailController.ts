@@ -1,9 +1,9 @@
 import { EmailRecordService, CharacterLimitError, EmailFormatError } from "../service/EmailRecordService";
 import { Transporter } from "./Transporter";
-import { Logger } from "../logger/logger"
+import { Logger } from "../logger/Logger"
 
 export type EmailResponse = {status: number, message: string}
-type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, message: string}
+export type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, message: string}
 
 class MissingInfoError extends Error
 {

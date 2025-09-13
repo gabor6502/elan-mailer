@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm'
 import { Record } from '../entity/Record'
-import { Logger } from '../logger/logger'
+import { Logger } from '../logger/Logger'
 
 const logger = new Logger("Data source")
 
