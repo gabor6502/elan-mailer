@@ -1,6 +1,6 @@
-# Elan Mailer (Node.js, Nodemailer, TypeORM, PostgreSQL)
+# Elan Mailer (Express, Nodemailer, Winston, TypeORM, PostgreSQL)
 
-A node backend to send emails to my contact email via Nodemailer, and store records of this through TypeORM and PostgreSQL.
+An Express backend to send emails to my contact email via Nodemailer, and store records of this through TypeORM and PostgreSQL.
 
 ## SMTP
 Uses Simple Mail Transfer Protocol with Nodemailer to send emails to a dedicated contact email address.

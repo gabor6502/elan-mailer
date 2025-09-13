@@ -165,19 +165,5 @@ describe("Email Controller: ", () =>
         expect(resp.message).toBeDefined()
     })
 
-    it("", () => 
-    {
-        // given
-        // when
-        // then
-    })
-
-    it("", () => 
-    {
-        // given
-        // when
-        // then
-    })
-
 })
 
