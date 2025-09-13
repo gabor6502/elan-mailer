@@ -1,12 +1,12 @@
-import { EntityManager } from "typeorm"
+import { Between, EntityManager } from "typeorm"
 import { MAX_CHARS, Record } from "../entity/Record"
 import { Logger } from "../logger/logger"
 
-// the expected format for dates that will be put in the DB
-const DATE_REGEX = /20[2-9]\d:((0[1-9])|(1[0-2])):(([0-2][1-9])|(3[0-1]))Z[+|-](((0\d)|(1[0-2])):[0]{2})/
-
 // the expected format for emails
 const EMAIL_REGEX = /[\w\-\.]+[@]([\w]+\.)+[\w\-]{2,}/
+
+// minutes past when it's okay for the same email addresss to send another email
+const THRESHOLD_MINS = 15
 
 /**
  * @name CharacterLimitError
@@ -18,19 +18,6 @@ export class CharacterLimitError extends Error
     constructor()
     {
         super(`Character limit of ${MAX_CHARS} exceed.`)
-    }
-}
-
-/**
- * @name DateFormatError
- * 
- * @description Thrown when a date is formatted improperly
- */
-export class DateFormatError extends Error
-{
-    constructor()
-    {
-        super("Date was not in the format 'YYYY:MM:DDZ[+/-]##:00'.")
     }
 }
 
@@ -71,9 +58,8 @@ export class EmailRecordService
      * @param fname First name of sender
      * @param lname Last name of sender
      * @param emailaddr Email address of sender
-     * @param date Date email sent
      */
-    async addRecord(fname: string, lname: string, emailaddr: string, date: string): Promise<void>
+    async addRecord(fname: string, lname: string, emailaddr: string): Promise<void>
     {
         // valiate input
 
@@ -81,17 +67,40 @@ export class EmailRecordService
         {
             throw new CharacterLimitError()
         }
-        else if (!DATE_REGEX.test(date)) 
-        {
-            throw new DateFormatError()
-        }
         else if (!EMAIL_REGEX.test(emailaddr))
         {
             throw new EmailFormatError()
         }
 
-        this.#_logger.info(`Inserting record {${fname}, ${lname}, ${emailaddr}, ${date}} ... `)
-        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: new Date(date)})
+        this.#_logger.info(`Inserting record {${fname}, ${lname}, ${emailaddr}, ${new Date().toString()}} ... `)
+        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: new Date()})
         this.#_logger.info("Record inserted")
+    }
+
+    /**
+     * @name unsendable
+     * 
+     * @description Determines if this email address has sent an email too short between time between the last one.
+     * 
+     * @param emailAddress The email address of the sender
+     * 
+     * @returns Promise<boolean>
+     */
+    async unsendable(emailAddress: string): Promise<boolean>
+    {
+        const currentTime = new Date()
+        const threshold = new Date(currentTime)
+        threshold.setMinutes(threshold.getMinutes() + THRESHOLD_MINS)
+
+        let ents = await this.#_recManager.find(Record, 
+            { 
+            where: 
+                { 
+                emailAddress: emailAddress, 
+                dateSent: Between(currentTime, threshold)
+                }
+            })
+
+        return ents.length > 0 // if we have found anything as of recent, it's not okay to send
     }
 }

@@ -1,9 +1,9 @@
-import { EmailRecordService, CharacterLimitError, DateFormatError, EmailFormatError } from "../service/EmailRecordService";
+import { EmailRecordService, CharacterLimitError, EmailFormatError } from "../service/EmailRecordService";
 import { Transporter } from "./Transporter";
 import { Logger } from "../logger/logger"
 
 type EmailResponse = {status: number, message: string}
-type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, date: string, message: string}
+type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, message: string}
 
 class MissingInfoError extends Error
 {
@@ -39,9 +39,8 @@ class DatabaseEntry
     #_firstName: string
     #_laststName: string
     #_emailAddress: string
-    #_date: string
 
-    private constructor(fname: string | undefined, lname: string | undefined, eadd: string | undefined, date: string | undefined)
+    private constructor(fname: string | undefined, lname: string | undefined, eadd: string | undefined)
     {
         let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
 
@@ -57,10 +56,6 @@ class DatabaseEntry
         {
             missingInfoError.addMissing("emailAddress")
         }
-        if (date == undefined)
-        {
-            missingInfoError.addMissing("date")
-        }
 
         if (missingInfoError.hasErrors())
         {
@@ -70,12 +65,11 @@ class DatabaseEntry
         this.#_firstName = fname
         this.#_laststName = lname
         this.#_emailAddress = eadd
-        this.#_date = date
     }
 
-    static makeEntry(fname: string | undefined, lname: string | undefined, eadd: string | undefined, date: string | undefined): DatabaseEntry
+    static makeEntry(fname: string | undefined, lname: string | undefined, eadd: string | undefined): DatabaseEntry
     {
-        return new DatabaseEntry(fname, lname, eadd, date)
+        return new DatabaseEntry(fname, lname, eadd)
     }
 
     get firstName(): string
@@ -91,11 +85,6 @@ class DatabaseEntry
     get emailAddress(): string
     {
         return this.#_emailAddress
-    }
-
-    get date(): string
-    {
-        return this.#_date
     }
 }
 
@@ -122,15 +111,18 @@ export class EmailControler
         let dbEntry: DatabaseEntry
         let emailResult: any
 
+        
         // TODO: make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
-        
+        if (await this.#_recordsService.unsendable(reqJson.emailAddress))
+        {
+            return {status: 403, message: `Another email has been sent from ${reqJson.emailAddress} too soon ago`}
+        }
 
-        
         // create an entry
         this.#_logger.info("Creating a record in the database ...")
         try
         {
-            dbEntry = DatabaseEntry.makeEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress, reqJson.date)
+            dbEntry = DatabaseEntry.makeEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress)
         } catch(error)
         {
             this.#_logger.error(error.message)
@@ -140,10 +132,10 @@ export class EmailControler
         // save the entry
         try
         {
-            await this.#_recordsService.addRecord(dbEntry.firstName, dbEntry.lastName, dbEntry.emailAddress, dbEntry.date)
+            await this.#_recordsService.addRecord(dbEntry.firstName, dbEntry.lastName, dbEntry.emailAddress)
         } catch (error)
         {
-            if (error instanceof CharacterLimitError || error instanceof DateFormatError || error instanceof EmailFormatError)
+            if (error instanceof CharacterLimitError || error instanceof EmailFormatError)
             {
                 this.#_logger.error(error.message)
                 return {status: 400, message: error.message}
@@ -151,7 +143,7 @@ export class EmailControler
             else
             {
                 this.#_logger.error("Could not insert into database")
-                return {status: 500, message: "A database error occured"}
+                return {status: 500, message: "A database error occured "+error.message}
             }
         }
 
@@ -159,10 +151,10 @@ export class EmailControler
         this.#_logger.info("Sending email ...")
         try
         {
-            emailResult = this.#_transporter.send(reqJson.emailAddress, reqJson.subject, reqJson.message)
+            emailResult = await this.#_transporter.send(reqJson.firstName, reqJson.lastName, reqJson.emailAddress, reqJson.subject, reqJson.message)
         } catch(error)
         {
-            return {status: 500, message: "Could not send email"}
+            return {status: 500, message: "Could not send email: "+error.message}
         }
         this.#_logger.info("Email sent - "+emailResult.response)
 

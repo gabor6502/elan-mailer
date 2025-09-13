@@ -13,15 +13,15 @@ export class Record {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({type: 'varchar', length: MAX_CHARS})
+    @Column({type: "varchar", length: MAX_CHARS})
     firstName: string
 
-    @Column({type: 'varchar', length: MAX_CHARS})
+    @Column({type: "varchar", length: MAX_CHARS})
     lastName: string
 
-    @Column({type: 'varchar', length: MAX_CHARS})
+    @Column({type: "varchar", length: MAX_CHARS})
     emailAddress: string
 
-    @Column({ type: 'timestamptz' })
+    @Column({ type: "timestamptz" })
     dateSent: Date
 }
