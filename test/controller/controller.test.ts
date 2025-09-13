@@ -5,20 +5,11 @@ import { Logger } from "../../src/logger/logger"
 
 jest.mock("../../src/logger/logger")
 jest.mock("../../src/service/EmailRecordService")
-
-// singleton so not easily mocked, this will suffice for now
-class MockedTransporter extends Transporter
+class MockedTransporter extends Transporter // singleton mock that will suffice for now
 {
-    constructor()
-    {
-        super()
-    }
-
+    constructor() { super() }
     // override
-    async send(firstName: string, lastName: string, emailAddress: string, subject: string, message: string): Promise<any> 
-    {
-        // do nothing
-    }
+    async send(firstName: string, lastName: string, emailAddress: string, subject: string, message: string): Promise<any> { /* do nothing */ }
 }
 
 describe("Score Controller Tests", () => 
@@ -41,5 +32,55 @@ describe("Score Controller Tests", () =>
 
         controller = new EmailController(service, transporter, logger)
     })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
+    it("", () => 
+    {
+        // given
+        // when
+        // then
+    })
+
 })
 
