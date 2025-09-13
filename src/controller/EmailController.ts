@@ -2,7 +2,7 @@ import { EmailRecordService, CharacterLimitError, EmailFormatError } from "../se
 import { Transporter } from "./Transporter";
 import { Logger } from "../logger/logger"
 
-type EmailResponse = {status: number, message: string}
+export type EmailResponse = {status: number, message: string}
 type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, message: string}
 
 class MissingInfoError extends Error
@@ -89,11 +89,11 @@ class DatabaseEntry
 }
 
 /**
- * @name EmailControler
+ * @name EmailController
  *
  * @description Communicates with the email records service and handles HTTP requests
  */
-export class EmailControler
+export class EmailController
 {
     #_recordsService: EmailRecordService
     #_transporter: Transporter
@@ -111,6 +111,7 @@ export class EmailControler
         let dbEntry: DatabaseEntry
         let emailResult: any
 
+        this.#_logger.info("Going to send a message from "+reqJson.emailAddress)
         
         // TODO: make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
         if (await this.#_recordsService.unsendable(reqJson.emailAddress))

@@ -90,17 +90,14 @@ export class EmailRecordService
     {
         const currentTime = new Date()
         const threshold = new Date(currentTime)
-        threshold.setMinutes(threshold.getMinutes() + THRESHOLD_MINS)
+        threshold.setMinutes(threshold.getMinutes() - THRESHOLD_MINS)
 
-        let ents = await this.#_recManager.find(Record, 
-            { 
-            where: 
-                { 
-                emailAddress: emailAddress, 
-                dateSent: Between(currentTime, threshold)
-                }
-            })
+        let ents = await this.#_recManager.findOneBy(Record, 
+                    { 
+                    emailAddress: emailAddress, 
+                    dateSent: Between(threshold, currentTime)
+                    })
 
-        return ents.length > 0 // if we have found anything as of recent, it's not okay to send
+        return ents != null // if we have found anything as of recent, it's not okay to send
     }
 }

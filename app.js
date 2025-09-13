@@ -2,11 +2,11 @@ import "reflect-metadata"
 import { initEmailRecordDataSource, destroyEmailRecordDataSource, RecordManager } from "./src/service/EmailRecordSource";
 
 import { EmailRecordService } from "./src/service/EmailRecordService";
-import { EmailControler } from "./src/controller/EmailController";
+import { EmailController } from "./src/controller/EmailController";
 import { Logger } from "./src/logger/logger";
 import { Transporter } from "./src/controller/Transporter";
 
-const controller = new EmailControler(new EmailRecordService(RecordManager, new Logger("Service")), Transporter.getInstance(), new Logger("Controller"))
+const controller = new EmailController(new EmailRecordService(RecordManager, new Logger("Service")), Transporter.getInstance(), new Logger("Controller"))
 const logger = new Logger("Server")
 
 const express = require("express")
