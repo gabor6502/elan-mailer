@@ -1,7 +1,6 @@
 import { EmailRecordService, CharacterLimitError, DateFormatError, EmailFormatError } from "../service/EmailRecordService";
+import { Transporter } from "./Transporter";
 import { Logger } from "../logger/logger"
-
-const nodemailer = require("nodemailer");
 
 type EmailResponse = {status: number, message: string}
 type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, date: string, message: string}
@@ -108,35 +107,23 @@ class DatabaseEntry
 export class EmailControler
 {
     #_recordsService: EmailRecordService
-    #_transporter: any
+    #_transporter: Transporter
     #_logger: Logger
 
-    constructor(service: EmailRecordService)
+    constructor(service: EmailRecordService, transporter: Transporter, logger: Logger)
     {
         this.#_recordsService = service
-
-        this.#_transporter = nodemailer.createTransport({
-            service: process.env.SMTP_SERVICE,
-            auth:
-            {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        })
-
-        this.#_logger = new Logger("Controller")
+        this.#_transporter = transporter
+        this.#_logger = logger
     }
 
     async sendEmail(reqJson: expectedJSON): Promise<EmailResponse>
     {
         let dbEntry: DatabaseEntry
-
-        let message: string = reqJson.message
-        let subject: string = reqJson.subject
         let emailResult: any
 
         // TODO: make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
-
+        
 
         
         // create an entry
@@ -172,12 +159,7 @@ export class EmailControler
         this.#_logger.info("Sending email ...")
         try
         {
-            emailResult = await this.#_transporter.sendMail({
-                from: process.env.SMTP_CONTACT_ADDRESS, 
-                to: process.env.SMTP_CONTACT_ADDRESS,
-                subject: subject,
-                text: "From: "+reqJson.emailAddress+"\n\n"+message
-            })
+            emailResult = this.#_transporter.send(reqJson.emailAddress, reqJson.subject, reqJson.message)
         } catch(error)
         {
             return {status: 500, message: "Could not send email"}

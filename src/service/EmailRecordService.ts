@@ -57,10 +57,10 @@ export class EmailRecordService
     #_recManager: EntityManager
     #_logger: Logger
 
-    constructor(man: EntityManager)
+    constructor(man: EntityManager, logger: Logger)
     {
         this.#_recManager = man
-        this.#_logger = new Logger("Service")
+        this.#_logger = logger
     }
 
     /**
