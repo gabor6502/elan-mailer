@@ -20,7 +20,7 @@ class MissingInfoError extends Error
         }
         else
         {
-            this.message = "Missing the following properties: " + name
+            this.message = "The following properties are undefined or empty: " + name
         }
     }
 
@@ -34,23 +34,23 @@ function noUndef(firstName: string | undefined, lastName: string | undefined, em
 {
     let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
 
-    if (firstName === undefined)
+    if (firstName === undefined || !firstName.length)
     {
         missingInfoError.addMissing("firstName")
     }
-    if (lastName === undefined)
+    if (lastName === undefined || !lastName.length)
     {
         missingInfoError.addMissing("lastName")
     }
-    if (emailAddress === undefined)
+    if (emailAddress === undefined || !emailAddress.length)
     {
         missingInfoError.addMissing("emailAddress")
     }
-    if (subject === undefined)
+    if (subject === undefined || !subject.length)
     {
         missingInfoError.addMissing("subject")
     }
-    if (message === undefined)
+    if (message === undefined || !message.length)
     {
         missingInfoError.addMissing("message")
     }

@@ -1,6 +1,6 @@
 import { EmailController, EmailResponse, RequestJSON } from "../../src/controller/EmailController"
 import { Transporter } from "../../src/controller/Transporter"
-import { EmailRecordService } from "../../src/service/EmailRecordService"
+import { CharacterLimitError, EmailFormatError, EmailRecordService } from "../../src/service/EmailRecordService"
 import { Logger } from "../../src/logger/Logger"
 
 jest.mock("../../src/logger/logger")
@@ -36,9 +36,7 @@ describe("Email Controller: ", () =>
     var logger: jest.Mocked<Logger>
     var transporter: MockedTransporter
     var service: jest.Mocked<EmailRecordService>
-
-    var emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
-
+    
     beforeEach(() => 
     {
         logger = new (<new () => Logger>Logger)() as jest.Mocked<Logger>
@@ -59,6 +57,8 @@ describe("Email Controller: ", () =>
         service.addRecord.mockImplementationOnce(async (f, l, e) => {})
 
         // when
+        let emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
+
         resp = await controller.sendEmail(emailJSON)
 
         // then
@@ -66,7 +66,41 @@ describe("Email Controller: ", () =>
         expect(service.addRecord).toHaveBeenCalledTimes(1)
         expect(transporter.calledOnce()).toBe(true)
         expect(resp.status).toEqual(201)
-        expect(resp.message).toBeTruthy();
+        expect(resp.message).toBeDefined()
+    })
+
+    it("should send 400 because at least one item expected in the body is undefined", async () => 
+    {
+        let resp: EmailResponse
+
+        // when
+        let req: RequestJSON = {firstName: undefined, lastName: undefined, emailAddress: undefined, subject: undefined, message: undefined}
+
+        resp = await controller.sendEmail(req)
+
+        // then
+        expect(service.unsendable).toHaveBeenCalledTimes(0)
+        expect(service.addRecord).toHaveBeenCalledTimes(0)
+        expect(transporter.calledAtAll()).toBe(false)
+        expect(resp.status).toEqual(400)
+        expect(resp.message).toBeDefined()
+    })
+
+    it("should send 400 because at least one item expected in the body is an empty string", async () => 
+    {
+        let resp: EmailResponse
+
+        // when
+        let req: RequestJSON = {firstName: "", lastName: "", emailAddress: "", subject: "", message: ""}
+
+        resp = await controller.sendEmail(req)
+
+        // then
+        expect(service.unsendable).toHaveBeenCalledTimes(0)
+        expect(service.addRecord).toHaveBeenCalledTimes(0)
+        expect(transporter.calledAtAll()).toBe(false)
+        expect(resp.status).toEqual(400)
+        expect(resp.message).toBeDefined()
     })
 
     it("should send 403 because the service said it wasn't sendable", async () => 
@@ -77,46 +111,58 @@ describe("Email Controller: ", () =>
         service.unsendable.mockImplementationOnce(async (eadd) => {return true})
 
         // when
-        resp = await controller.sendEmail(emailJSON)
+        // *more of a service thing, just need to see controller's reaction*
+
+        resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
 
         // then
         expect(service.unsendable).toHaveBeenCalledTimes(1)
         expect(service.addRecord).toHaveBeenCalledTimes(0)
         expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(403)
-        expect(resp.message).toBeTruthy();
+        expect(resp.message).toBeDefined()
     })
 
-    it("should send 400 because all items expected from body are missing", async () => 
+    it("should send 400 because there's too many characters in at least one of the strings", async () => 
     {
         let resp: EmailResponse
 
         // given
-        let req: RequestJSON = {firstName: undefined, lastName: undefined, emailAddress: undefined, subject: undefined, message: undefined}
+        service.unsendable.mockImplementationOnce(async (eadd) => {return false})
+        service.addRecord.mockImplementationOnce(async (f, l, e) => {throw new CharacterLimitError()})
 
         // when
-        resp = await controller.sendEmail(req)
+        // *more of a service thing, just need to see controller's reaction*
+
+        resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
 
         // then
-        expect(service.unsendable).toHaveBeenCalledTimes(0)
-        expect(service.addRecord).toHaveBeenCalledTimes(0)
+        expect(service.unsendable).toHaveBeenCalledTimes(1)
+        expect(service.addRecord).toHaveBeenCalledTimes(1)
         expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(400)
-        expect(resp.message).toBeTruthy();
+        expect(resp.message).toBeDefined()
     })
 
-    it("", () => 
+    it("should send 400 because of a poorly formatted email", async () => 
     {
-        // given
-        // when
-        // then
-    })
+        let resp: EmailResponse
 
-    it("", () => 
-    {
         // given
+        service.unsendable.mockImplementationOnce(async (eadd) => {return false})
+        service.addRecord.mockImplementationOnce(async (f, l, e) => {throw new EmailFormatError()})
+
         // when
+        // *more of a service thing, just need to see controller's reaction*
+
+        resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", subject: "le hi", message: "el hola"})
+
         // then
+        expect(service.unsendable).toHaveBeenCalledTimes(1)
+        expect(service.addRecord).toHaveBeenCalledTimes(1)
+        expect(transporter.calledAtAll()).toBe(false)
+        expect(resp.status).toEqual(400)
+        expect(resp.message).toBeDefined()
     })
 
     it("", () => 
