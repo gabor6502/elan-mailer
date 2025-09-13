@@ -1,4 +1,4 @@
-import { EmailController, EmailResponse, expectedJSON } from "../../src/controller/EmailController"
+import { EmailController, EmailResponse, RequestJSON } from "../../src/controller/EmailController"
 import { Transporter } from "../../src/controller/Transporter"
 import { EmailRecordService } from "../../src/service/EmailRecordService"
 import { Logger } from "../../src/logger/Logger"
@@ -22,6 +22,11 @@ class MockedTransporter extends Transporter // singleton mock that will suffice 
     {
         return this.#_calledSendCount === 1
     }
+
+    calledAtAll(): boolean
+    {
+        return this.#_calledSendCount > 0
+    }
 }
 
 describe("Email Controller: ", () => 
@@ -32,7 +37,7 @@ describe("Email Controller: ", () =>
     var transporter: MockedTransporter
     var service: jest.Mocked<EmailRecordService>
 
-    var emailJSON: expectedJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
+    var emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
 
     beforeEach(() => 
     {
@@ -76,15 +81,28 @@ describe("Email Controller: ", () =>
 
         // then
         expect(service.unsendable).toHaveBeenCalledTimes(1)
+        expect(service.addRecord).toHaveBeenCalledTimes(0)
+        expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(403)
         expect(resp.message).toBeTruthy();
     })
 
-    it("", () => 
+    it("should send 400 because all items expected from body are missing", async () => 
     {
+        let resp: EmailResponse
+
         // given
+        let req: RequestJSON = {firstName: undefined, lastName: undefined, emailAddress: undefined, subject: undefined, message: undefined}
+
         // when
+        resp = await controller.sendEmail(req)
+
         // then
+        expect(service.unsendable).toHaveBeenCalledTimes(0)
+        expect(service.addRecord).toHaveBeenCalledTimes(0)
+        expect(transporter.calledAtAll()).toBe(false)
+        expect(resp.status).toEqual(400)
+        expect(resp.message).toBeTruthy();
     })
 
     it("", () => 

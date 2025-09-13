@@ -3,88 +3,61 @@ import { Transporter } from "./Transporter";
 import { Logger } from "../logger/Logger"
 
 export type EmailResponse = {status: number, message: string}
-export type expectedJSON = {firstName: string, lastName: string, emailAddress: string, subject: string, message: string}
+export type RequestJSON = {firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, subject: string| undefined, message: string | undefined}
 
 class MissingInfoError extends Error
 {
-    #_hasErrors
-
     constructor()
     {
-        super("Missing the following properties: ")
-        this.#_hasErrors = false
+        super("")
     }
 
     addMissing(name: string)
     {
-        if (!this.#_hasErrors)
+        if (this.message.length > 0)
         {
-            this.#_hasErrors = true
-            this.message = this.message + name
+            this.message += ", "+name
         }
         else
         {
-            this.message += ", "+name
+            this.message = "Missing the following properties: " + name
         }
     }
 
     hasErrors(): boolean
     {
-        return this.#_hasErrors
+        return this.message.length > 0
     }
 }
 
-class DatabaseEntry
+function noUndef(firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, subject: string| undefined, message: string | undefined)
 {
-    #_firstName: string
-    #_laststName: string
-    #_emailAddress: string
+    let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
 
-    private constructor(fname: string | undefined, lname: string | undefined, eadd: string | undefined)
+    if (firstName === undefined)
     {
-        let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
-
-        if (fname == undefined)
-        {
-            missingInfoError.addMissing("firstName")
-        }
-        if (lname == undefined)
-        {
-            missingInfoError.addMissing("lastName")
-        }
-        if (eadd == undefined)
-        {
-            missingInfoError.addMissing("emailAddress")
-        }
-
-        if (missingInfoError.hasErrors())
-        {
-            throw missingInfoError;
-        }
-
-        this.#_firstName = fname
-        this.#_laststName = lname
-        this.#_emailAddress = eadd
+        missingInfoError.addMissing("firstName")
+    }
+    if (lastName === undefined)
+    {
+        missingInfoError.addMissing("lastName")
+    }
+    if (emailAddress === undefined)
+    {
+        missingInfoError.addMissing("emailAddress")
+    }
+    if (subject === undefined)
+    {
+        missingInfoError.addMissing("subject")
+    }
+    if (message === undefined)
+    {
+        missingInfoError.addMissing("message")
     }
 
-    static makeEntry(fname: string | undefined, lname: string | undefined, eadd: string | undefined): DatabaseEntry
+    if (missingInfoError.hasErrors())
     {
-        return new DatabaseEntry(fname, lname, eadd)
-    }
-
-    get firstName(): string
-    {
-        return this.#_firstName
-    }
-
-    get lastName(): string
-    {
-        return this.#_laststName
-    }
-
-    get emailAddress(): string
-    {
-        return this.#_emailAddress
+        throw missingInfoError;
     }
 }
 
@@ -106,34 +79,33 @@ export class EmailController
         this.#_logger = logger
     }
 
-    async sendEmail(reqJson: expectedJSON): Promise<EmailResponse>
+    async sendEmail(reqJson: RequestJSON): Promise<EmailResponse>
     {
-        let dbEntry: DatabaseEntry
         let emailResult: any
 
-        this.#_logger.info("Going to send a message from "+reqJson.emailAddress)
-        
-        // TODO: make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
-        if (await this.#_recordsService.unsendable(reqJson.emailAddress))
-        {
-            return {status: 403, message: `Another email has been sent from ${reqJson.emailAddress} too soon ago`}
-        }
-
-        // create an entry
-        this.#_logger.info("Creating a record in the database ...")
+        // ensure nothing is missing
         try
         {
-            dbEntry = DatabaseEntry.makeEntry(reqJson.firstName, reqJson.lastName,  reqJson.emailAddress)
+            noUndef(reqJson.firstName, reqJson.lastName, reqJson.emailAddress, reqJson.subject, reqJson.message)
         } catch(error)
         {
             this.#_logger.error(error.message)
             return {status: 400, message: error.message}
         }
         
-        // save the entry
+        this.#_logger.info("Going to send a message from "+reqJson.emailAddress)
+        
+        // make sure the sender hasn't sent an email to you too recently (spam protection/quota management)
+        if (await this.#_recordsService.unsendable(reqJson.emailAddress))
+        {
+            return {status: 403, message: `Another email has been sent from ${reqJson.emailAddress} too soon ago`}
+        }
+        
+        // save an entry
+        this.#_logger.info("Creating a record in the database ...")
         try
         {
-            await this.#_recordsService.addRecord(dbEntry.firstName, dbEntry.lastName, dbEntry.emailAddress)
+            await this.#_recordsService.addRecord(reqJson.firstName, reqJson.lastName, reqJson.emailAddress)
         } catch (error)
         {
             if (error instanceof CharacterLimitError || error instanceof EmailFormatError)
