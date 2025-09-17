@@ -3,7 +3,7 @@ import { EntityManager } from "typeorm"
 import { Logger } from "../../src/logger/Logger"
 import { MAX_CHARS } from "../../src/entity/Record";
 
-jest.mock("../../src/logger/logger.ts")
+jest.mock("../../src/logger/logger")
 jest.mock("typeorm", () => 
 {
   const actual = jest.requireActual("typeorm");
