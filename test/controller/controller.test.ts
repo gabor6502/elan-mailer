@@ -2,8 +2,8 @@ import { EmailController, EmailResponse, RequestJSON } from "../../src/controlle
 import { CharacterLimitError, EmailFormatError, EmailRecordService } from "../../src/service/EmailRecordService"
 import { Logger } from "../../src/logger/Logger"
 
-jest.mock("../../src/logger/logger.ts")
-jest.mock("../../src/service/EmailRecordService.ts")
+jest.mock("../../src/logger/logger")
+jest.mock("../../src/service/EmailRecordService")
 
 describe("Email Controller tests: ", () => 
 {
