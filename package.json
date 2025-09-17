@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npx tsc",
     "start" : "node -r dotenv/config ./build/app.js",
-    "test": "npx jest --coverage"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "cross-env": "^10.0.0",
