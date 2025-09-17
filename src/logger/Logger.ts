@@ -36,10 +36,7 @@ export class Logger
             ]
         })
 
-        if (process.env.NODE_ENV !== "production")
-        {
-            this.#_logger.add(new winston.transports.Console({ format: logFormat }))
-        }
+        this.#_logger.remove(winston.transports.Console)
     }
 
     /**

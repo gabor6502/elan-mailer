@@ -54,6 +54,7 @@ server = app.listen(PORT, async (error) =>
         await initEmailRecordDataSource()
 
         logger.info(`Listening on port ${PORT}`)
+        
     }
 })
 
