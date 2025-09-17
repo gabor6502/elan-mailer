@@ -128,12 +128,12 @@ describe("Email Controller tests: ", () =>
         expect(resp.message).toBeDefined()
     })
 
-    it("should send 400 because of a poorly formatted email", async () => 
+    it("should send 400 because of a poorly formatted email address", async () => 
     {
         let resp: EmailResponse
 
         // given
-        service.unsendable.mockResolvedValueOnce(false)//mockImplementationOnce(async (eadd) => {return false})
+        service.unsendable.mockResolvedValueOnce(false)
         service.addRecord.mockImplementationOnce(async (f, l, e) => {throw new EmailFormatError()})
 
         // when
