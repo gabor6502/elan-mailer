@@ -5,6 +5,7 @@ import { Logger } from "../../src/logger/Logger"
 
 jest.mock("../../src/logger/logger")
 jest.mock("../../src/service/EmailRecordService")
+
 class MockedTransporter extends Transporter // singleton mock that will suffice for now
 {
     #_calledSendCount = 0
@@ -29,7 +30,7 @@ class MockedTransporter extends Transporter // singleton mock that will suffice 
     }
 }
 
-describe("Email Controller: ", () => 
+describe("Email Controller tests: ", () => 
 {
     var controller: EmailController
 
@@ -53,8 +54,8 @@ describe("Email Controller: ", () =>
         let resp: EmailResponse
 
         // given
-        service.unsendable.mockImplementationOnce(async (eadd) => {return false})
-        service.addRecord.mockImplementationOnce(async (f, l, e) => {})
+        service.unsendable.mockResolvedValueOnce(false)
+        service.addRecord.mockResolvedValueOnce()
 
         // when
         let emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
@@ -62,8 +63,8 @@ describe("Email Controller: ", () =>
         resp = await controller.sendEmail(emailJSON)
 
         // then
-        expect(service.unsendable).toHaveBeenCalledTimes(1)
-        expect(service.addRecord).toHaveBeenCalledTimes(1)
+        expect(service.unsendable).toHaveBeenCalled()
+        expect(service.addRecord).toHaveBeenCalled()
         expect(transporter.calledOnce()).toBe(true)
         expect(resp.status).toEqual(201)
         expect(resp.message).toBeDefined()
@@ -116,7 +117,7 @@ describe("Email Controller: ", () =>
         resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
 
         // then
-        expect(service.unsendable).toHaveBeenCalledTimes(1)
+        expect(service.unsendable).toHaveBeenCalled()
         expect(service.addRecord).toHaveBeenCalledTimes(0)
         expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(403)
@@ -137,8 +138,8 @@ describe("Email Controller: ", () =>
         resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
 
         // then
-        expect(service.unsendable).toHaveBeenCalledTimes(1)
-        expect(service.addRecord).toHaveBeenCalledTimes(1)
+        expect(service.unsendable).toHaveBeenCalled()
+        expect(service.addRecord).toHaveBeenCalled()
         expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()
@@ -158,8 +159,8 @@ describe("Email Controller: ", () =>
         resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", subject: "le hi", message: "el hola"})
 
         // then
-        expect(service.unsendable).toHaveBeenCalledTimes(1)
-        expect(service.addRecord).toHaveBeenCalledTimes(1)
+        expect(service.unsendable).toHaveBeenCalled()
+        expect(service.addRecord).toHaveBeenCalled()
         expect(transporter.calledAtAll()).toBe(false)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()

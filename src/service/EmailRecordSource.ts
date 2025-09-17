@@ -1,6 +1,6 @@
-import { DataSource } from 'typeorm'
-import { Record } from '../entity/Record'
-import { Logger } from '../logger/Logger'
+import { DataSource, EntityManager } from "typeorm"
+import { Record } from "../entity/Record"
+import { Logger } from "../logger/Logger"
 
 const logger = new Logger("Data source")
 
@@ -9,7 +9,7 @@ const logger = new Logger("Data source")
  *
  * @description Properties of the data Source for the email record source.
  */
-export const EmailRecordDataSource = new DataSource(
+export const EmailRecordDataSource: DataSource = new DataSource(
 {
     type: 'postgres',
     host: process.env.DB_HOST ,
@@ -29,7 +29,7 @@ export const EmailRecordDataSource = new DataSource(
  * 
  * @description Entity Manager for records 
  */
-export const RecordManager = EmailRecordDataSource.manager
+export const RecordManager: EntityManager = EmailRecordDataSource.manager
 
 /**
  * @name initEmailRecordDataSource

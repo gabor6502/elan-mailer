@@ -57,23 +57,23 @@ export class EmailRecordService
      * 
      * @param fname First name of sender
      * @param lname Last name of sender
-     * @param emailaddr Email address of sender
+     * @param emailAddr Email address of sender
      */
-    async addRecord(fname: string, lname: string, emailaddr: string): Promise<void>
+    async addRecord(fname: string, lname: string, emailAddr: string): Promise<void>
     {
-        // valiate input
+        // validate input
 
-        if (fname.length > MAX_CHARS || lname.length > MAX_CHARS || emailaddr.length > MAX_CHARS)
+        if (fname.length > MAX_CHARS || lname.length > MAX_CHARS || emailAddr.length > MAX_CHARS)
         {
             throw new CharacterLimitError()
         }
-        else if (!EMAIL_REGEX.test(emailaddr))
+        else if (!EMAIL_REGEX.test(emailAddr))
         {
             throw new EmailFormatError()
         }
 
-        this.#_logger.info(`Inserting record {${fname}, ${lname}, ${emailaddr}, ${new Date().toString()}} ... `)
-        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailaddr, dateSent: new Date()})
+        this.#_logger.info(`Inserting record {${fname}, ${lname}, ${emailAddr}, ${new Date().toString()}} ... `)
+        await this.#_recManager.insert(Record, {firstName: fname, lastName: lname, emailAddress: emailAddr, dateSent: new Date()})
         this.#_logger.info("Record inserted")
     }
 

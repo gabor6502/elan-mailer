@@ -27,7 +27,7 @@ export class Transporter
      * 
      * @description Returns singleton instance of transporter
      */
-    static getInstance()
+    static getInstance(): Transporter
     {
         if (Transporter.#_transporter == null)
         {
