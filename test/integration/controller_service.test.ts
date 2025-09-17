@@ -5,7 +5,7 @@ import { EntityManager } from "typeorm"
 import { Logger } from "../../src/logger/Logger"
 
 
-jest.mock("../../src/logger/logger")
+jest.mock("../../src/logger/logger.ts")
 jest.mock("typeorm", () => 
 {
   const actual = jest.requireActual("typeorm");
