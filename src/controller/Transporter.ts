@@ -10,7 +10,7 @@ export class Transporter
     static #_transporter = null // instance of Transporter class
     #_nodemailer // the configured nodemailer that can send emails
 
-    protected constructor() // protected so that it can be mocked
+    private constructor()
     {
         this.#_nodemailer = nodemailer.createTransport({
             service: process.env.SMTP_SERVICE,

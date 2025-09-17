@@ -1,41 +1,16 @@
 import { EmailController, EmailResponse, RequestJSON } from "../../src/controller/EmailController"
-import { Transporter } from "../../src/controller/Transporter"
 import { CharacterLimitError, EmailFormatError, EmailRecordService } from "../../src/service/EmailRecordService"
 import { Logger } from "../../src/logger/Logger"
 
 jest.mock("../../src/logger/logger")
 jest.mock("../../src/service/EmailRecordService")
 
-class MockedTransporter extends Transporter // singleton mock that will suffice for now
-{
-    #_calledSendCount = 0
-
-    constructor() { super() }
-    // override
-    async send(firstName: string, lastName: string, emailAddress: string, subject: string, message: string): Promise<any> 
-    { 
-        // we won't be testing the transporter in this test, so this is really the only thing send needs to do
-        this.#_calledSendCount++
-        return {response: "I sent an email :3"}
-    }
-
-    calledOnce(): boolean
-    {
-        return this.#_calledSendCount === 1
-    }
-
-    calledAtAll(): boolean
-    {
-        return this.#_calledSendCount > 0
-    }
-}
-
 describe("Email Controller tests: ", () => 
 {
     var controller: EmailController
 
     var logger: jest.Mocked<Logger>
-    var transporter: MockedTransporter
+    var transporter: any
     var service: jest.Mocked<EmailRecordService>
     
     beforeEach(() => 
@@ -44,7 +19,15 @@ describe("Email Controller tests: ", () =>
         jest.spyOn(logger, "info").mockImplementation(() => {})
         jest.spyOn(logger, "error").mockImplementation(() => {})
 
-        transporter = new MockedTransporter()
+        transporter = 
+        {
+            send: jest.fn().mockImplementation(
+                    async (firstName: string, lastName: string, emailAddress: string, subject: string, message: string) => 
+                    {
+                        return Promise<void>
+                    })
+        }  
+
         service = new (<new () => EmailRecordService>EmailRecordService)() as jest.Mocked<EmailRecordService>
         controller = new EmailController(service, transporter, logger)
     })
@@ -65,7 +48,7 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalled()
         expect(service.addRecord).toHaveBeenCalled()
-        expect(transporter.calledOnce()).toBe(true)
+        expect(transporter.send).toHaveBeenCalled()
         expect(resp.status).toEqual(201)
         expect(resp.message).toBeDefined()
     })
@@ -82,7 +65,7 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalledTimes(0)
         expect(service.addRecord).toHaveBeenCalledTimes(0)
-        expect(transporter.calledAtAll()).toBe(false)
+        expect(transporter.send).toHaveBeenCalledTimes(0)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()
     })
@@ -99,7 +82,7 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalledTimes(0)
         expect(service.addRecord).toHaveBeenCalledTimes(0)
-        expect(transporter.calledAtAll()).toBe(false)
+        expect(transporter.send).toHaveBeenCalledTimes(0)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()
     })
@@ -109,7 +92,7 @@ describe("Email Controller tests: ", () =>
         let resp: EmailResponse
 
         // given
-        service.unsendable.mockImplementationOnce(async (eadd) => {return true})
+        service.unsendable.mockResolvedValueOnce(true)
 
         // when
         // *more of a service thing, just need to see controller's reaction*
@@ -119,7 +102,7 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalled()
         expect(service.addRecord).toHaveBeenCalledTimes(0)
-        expect(transporter.calledAtAll()).toBe(false)
+        expect(transporter.send).toHaveBeenCalledTimes(0)
         expect(resp.status).toEqual(403)
         expect(resp.message).toBeDefined()
     })
@@ -129,7 +112,7 @@ describe("Email Controller tests: ", () =>
         let resp: EmailResponse
 
         // given
-        service.unsendable.mockImplementationOnce(async (eadd) => {return false})
+        service.unsendable.mockResolvedValueOnce(false)
         service.addRecord.mockImplementationOnce(async (f, l, e) => {throw new CharacterLimitError()})
 
         // when
@@ -140,7 +123,7 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalled()
         expect(service.addRecord).toHaveBeenCalled()
-        expect(transporter.calledAtAll()).toBe(false)
+        expect(transporter.send).toHaveBeenCalledTimes(0)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()
     })
@@ -150,7 +133,7 @@ describe("Email Controller tests: ", () =>
         let resp: EmailResponse
 
         // given
-        service.unsendable.mockImplementationOnce(async (eadd) => {return false})
+        service.unsendable.mockResolvedValueOnce(false)//mockImplementationOnce(async (eadd) => {return false})
         service.addRecord.mockImplementationOnce(async (f, l, e) => {throw new EmailFormatError()})
 
         // when
@@ -161,10 +144,9 @@ describe("Email Controller tests: ", () =>
         // then
         expect(service.unsendable).toHaveBeenCalled()
         expect(service.addRecord).toHaveBeenCalled()
-        expect(transporter.calledAtAll()).toBe(false)
+        expect(transporter.send).toHaveBeenCalledTimes(0)
         expect(resp.status).toEqual(400)
         expect(resp.message).toBeDefined()
     })
 
 })
-
