@@ -9,7 +9,7 @@
     "build": "npx tsc",
     "start-dev": "set NODE_ENV=development && node -r dotenv/config ./build/app.js",
     "start" : "set NODE_ENV=production && node -r dotenv/config ./build/app.js",
-    "test": "npx jest"
+    "test": "npx -r dotenv/config jest"
   },
   "dependencies": {
     "cross-env": "^10.0.0",
