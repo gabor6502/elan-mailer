@@ -33,4 +33,4 @@ jobs:
         runs-on: windows-latest
         steps:
             - name: Print a message
-              run: echo Write actions to deploy me!
+              run: echo "Write actions to deploy me!""
