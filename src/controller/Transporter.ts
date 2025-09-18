@@ -42,8 +42,8 @@ export class Transporter
         return await this.#_nodemailer.sendMail({
                 from: process.env.SMTP_CONTACT_ADDRESS, 
                 to: process.env.SMTP_CONTACT_ADDRESS,
-                subject: subject,
-                text: `From ${firstName} ${lastName} (${emailAddress})\n\n${message}`
+                subject: `${firstName} ${lastName} (${emailAddress}) has sent you a message!`,
+                text: `${message}`
             })
     }
 }
