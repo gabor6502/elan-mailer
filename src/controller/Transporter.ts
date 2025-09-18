@@ -37,12 +37,12 @@ export class Transporter
         return Transporter.#_transporter
     }
 
-    async send(firstName: string, lastName: string, emailAddress: string, subject: string, message: string)
+    async send(subject: string, message: string)
     {
         return await this.#_nodemailer.sendMail({
                 from: process.env.SMTP_CONTACT_ADDRESS, 
                 to: process.env.SMTP_CONTACT_ADDRESS,
-                subject: `${firstName} ${lastName} (${emailAddress}) has sent you a message!`,
+                subject: subject,
                 text: `${message}`
             })
     }

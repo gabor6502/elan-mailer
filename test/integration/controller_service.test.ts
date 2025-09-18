@@ -57,7 +57,7 @@ describe("Controller and Service Integration Test", () =>
         manager.findOneBy.mockResolvedValueOnce(null) // used by "unsendable" method, null returned on query means email is sendable
 
         // when
-        let req: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
+        let req: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", message: "See subject line." }
 
         resp = await controller.sendEmail(req)
 
@@ -81,7 +81,7 @@ describe("Controller and Service Integration Test", () =>
         manager.findOneBy.mockResolvedValueOnce(null)
         
         // when
-        resp = await controller.sendEmail({ firstName: "Roy", lastName: maxedOut, emailAddress: "yahoo@yahoo.ca", subject: "Hi", message: "Hi pt. 2" })
+        resp = await controller.sendEmail({ firstName: "Roy", lastName: maxedOut, emailAddress: "yahoo@yahoo.ca", message: "Hi" })
 
         // then
         expect(manager.insert).toHaveBeenCalledTimes(0)
@@ -98,7 +98,7 @@ describe("Controller and Service Integration Test", () =>
         manager.findOneBy.mockResolvedValueOnce(null)
 
         // when
-        resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", subject: "le hi", message: "el hola"})
+        resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", message: "le bonjour"})
 
         // then
         expect(manager.insert).toHaveBeenCalledTimes(0)

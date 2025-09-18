@@ -41,7 +41,7 @@ describe("Email Controller tests: ", () =>
         service.addRecord.mockResolvedValueOnce()
 
         // when
-        let emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", subject: "Hello", message: "See subject line." }
+        let emailJSON: RequestJSON = { firstName: "Roy", lastName: "Dismey", emailAddress: "roy.dismey@yahoo.ca", message: "Hello!" }
 
         resp = await controller.sendEmail(emailJSON)
 
@@ -58,7 +58,7 @@ describe("Email Controller tests: ", () =>
         let resp: EmailResponse
 
         // when
-        let req: RequestJSON = {firstName: undefined, lastName: undefined, emailAddress: undefined, subject: undefined, message: undefined}
+        let req: RequestJSON = {firstName: undefined, lastName: undefined, emailAddress: undefined, message: undefined}
 
         resp = await controller.sendEmail(req)
 
@@ -75,7 +75,7 @@ describe("Email Controller tests: ", () =>
         let resp: EmailResponse
 
         // when
-        let req: RequestJSON = {firstName: "", lastName: "", emailAddress: "", subject: "", message: ""}
+        let req: RequestJSON = {firstName: "", lastName: "", emailAddress: "", message: ""}
 
         resp = await controller.sendEmail(req)
 
@@ -97,7 +97,7 @@ describe("Email Controller tests: ", () =>
         // when
         // *more of a service thing, just need to see controller's reaction*
 
-        resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
+        resp = await controller.sendEmail({firstName: "h", lastName: "o", emailAddress: "l", message: "a"})
 
         // then
         expect(service.unsendable).toHaveBeenCalled()
@@ -118,7 +118,7 @@ describe("Email Controller tests: ", () =>
         // when
         // *more of a service thing, just need to see controller's reaction*
 
-        resp = await controller.sendEmail({firstName: "h", lastName: "e", emailAddress: "l", subject: "l", message: "o"})
+        resp = await controller.sendEmail({firstName: "h", lastName: "o", emailAddress: "l", message: "a"})
 
         // then
         expect(service.unsendable).toHaveBeenCalled()
@@ -139,7 +139,7 @@ describe("Email Controller tests: ", () =>
         // when
         // *more of a service thing, just need to see controller's reaction*
 
-        resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", subject: "le hi", message: "el hola"})
+        resp = await controller.sendEmail({firstName: "Firstingon", lastName: "Lastington", emailAddress: "wow really bad!!!!", message: "el hola"})
 
         // then
         expect(service.unsendable).toHaveBeenCalled()

@@ -3,7 +3,7 @@ import { Transporter } from "./Transporter";
 import { Logger } from "../logger/Logger"
 
 export type EmailResponse = {status: number, message: string}
-export type RequestJSON = {firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, subject: string| undefined, message: string | undefined}
+export type RequestJSON = {firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, message: string | undefined}
 
 class MissingInfoError extends Error
 {
@@ -30,7 +30,7 @@ class MissingInfoError extends Error
     }
 }
 
-function noUndef(firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, subject: string| undefined, message: string | undefined)
+function noUndef(firstName: string | undefined, lastName: string | undefined, emailAddress: string | undefined, message: string | undefined)
 {
     let missingInfoError: MissingInfoError = new MissingInfoError() // just in case
 
@@ -45,10 +45,6 @@ function noUndef(firstName: string | undefined, lastName: string | undefined, em
     if (emailAddress === undefined || !emailAddress.length)
     {
         missingInfoError.addMissing("emailAddress")
-    }
-    if (subject === undefined || !subject.length)
-    {
-        missingInfoError.addMissing("subject")
     }
     if (message === undefined || !message.length)
     {
@@ -86,7 +82,7 @@ export class EmailController
         // ensure nothing is missing
         try
         {
-            noUndef(reqJson.firstName, reqJson.lastName, reqJson.emailAddress, reqJson.subject, reqJson.message)
+            noUndef(reqJson.firstName, reqJson.lastName, reqJson.emailAddress, reqJson.message)
         } catch(error)
         {
             this.#_logger.error(error.message)
@@ -124,7 +120,7 @@ export class EmailController
         this.#_logger.info("Sending email ...")
         try
         {
-            emailResult = await this.#_transporter.send(reqJson.firstName, reqJson.lastName, reqJson.emailAddress, reqJson.subject, reqJson.message)
+            emailResult = await this.#_transporter.send(`${reqJson.firstName} ${reqJson.lastName} (${reqJson.emailAddress}) has sent you a message!`, reqJson.message)
         } catch(error)
         {
             return {status: 500, message: "Could not send email: "+error.message}
