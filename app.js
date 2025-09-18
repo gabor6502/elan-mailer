@@ -14,10 +14,23 @@ const express = require("express")
 const app = express();
 app.use(express.json()); // json middleware
 
-const PORT = 6969
+const PORT = 7000
 
 var shutdown = false
 var server
+
+/**
+ * @name Access-Control Middleware
+ * 
+ * @description Middleware setup for Access-Control-Allow props
+ */
+app.use((req, res, next) => 
+{
+    res.setHeader("Access-Control-Allow-Origin", "*"); // dev only, release repo will have proper domain name configured 
+    res.setHeader("Access-Control-Allow-Methods", "POST");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    next();
+})
 
 /**
  * @name send

@@ -37,6 +37,15 @@ export class Transporter
         return Transporter.#_transporter
     }
 
+    /**
+     * @name send
+     * 
+     * @description Sends an email to an email address specified elsewhere.
+     * 
+     * @param subject Subject to send with
+     * @param message Message to send
+     * @returns 
+     */
     async send(subject: string, message: string)
     {
         return await this.#_nodemailer.sendMail({
