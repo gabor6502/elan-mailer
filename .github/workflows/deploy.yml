@@ -8,7 +8,7 @@ on:
 jobs:
     build:
         runs-on:
-            ubuntu-latest
+            windows-latest
         steps:
             - name: Checkout
               uses: actions/checkout@v5
@@ -32,5 +32,5 @@ jobs:
         needs: build
         runs-on: windows-latest
         steps:
-            - name: Print a message
-              run: echo "should not see this msg"
+            - name: Deploy to Render server
+              run: curl -X POST ${{secrets.RENDER_DEPLOY_HOOK}}

@@ -14,8 +14,6 @@ const express = require("express")
 const app = express();
 app.use(express.json()); // json middleware
 
-const PORT = 7000
-
 var shutdown = false
 var server
 
@@ -56,7 +54,7 @@ app.post('/send', async (request, response) =>
  * 
  * @returns Server instance
  */
-server = app.listen(PORT, async (error) => 
+server = app.listen(process.env.PORT, async (error) => 
 {
     if (error)
     {
@@ -66,7 +64,7 @@ server = app.listen(PORT, async (error) =>
     {
         await initEmailRecordDataSource()
 
-        logger.info(`Listening on port ${PORT}`)
+        logger.info(`Listening on port ${process.env.PORT}`)
         
     }
 })
