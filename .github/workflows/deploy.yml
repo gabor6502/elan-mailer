@@ -1,4 +1,4 @@
-name: Deploy server
+name: Deploy to a Render server
 
 on:
     push:
@@ -33,4 +33,4 @@ jobs:
         runs-on: windows-latest
         steps:
             - name: Deploy to Render server
-              run: curl -X POST ${{secrets.RENDER_DEPLOY_HOOK}}
+              run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
