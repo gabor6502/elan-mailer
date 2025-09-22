@@ -6,18 +6,17 @@ on:
             - main
 
 jobs:
-    build:
+    build-and-deploy:
         runs-on:
-            windows-latest
+            ubuntu-latest
+        container:
+          image: node22
+
         steps:
             - name: Checkout
               uses: actions/checkout@v5
-
-            - name: Setup Node
-              uses: actions/setup-node@v5
               with:
                 node-version: 22
-                cache: 'npm'
 
             - name: Install Dependencies 
               run: npm ci
@@ -27,10 +26,6 @@ jobs:
 
             - name: Build App
               run: npm run build
-    
-    deploy:
-        needs: build
-        runs-on: windows-latest
-        steps:
-            - name: Print a message
+
+            - name: Print a message asking to deploy
               run: echo "Write actions to deploy me!"
